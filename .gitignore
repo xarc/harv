@@ -1,0 +1,12 @@
+*/**
+!*/
+!/hdl/**/*.vhd
+!/sim/**/*.vhd
+!/src/**/*.asm
+!/script/*.sh
+!/script/*.py
+!/script/*.do
+!/script/*.tcl
+!/script/*.ld
+!/xilinx/*.wcfg
+!/images/*.png
