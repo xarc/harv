@@ -55,7 +55,7 @@ begin
   g_HAMMING_REG : if HAMMING_ENABLE generate
     constant DETECT_DOUBLE  : boolean := TRUE;
     constant REG_DATA_WIDTH : integer := 32 + get_ecc_size(32, DETECT_DOUBLE);
-    constant RESET_VALUE_HAMMING : std_logic_vector(REG_DATA_WIDTH+31 downto 0) := get_parity_data_result(RESET_VALUE, DETECT_DOUBLE) & RESET_VALUE;
+    constant RESET_VALUE_HAMMING : std_logic_vector(REG_DATA_WIDTH-1 downto 0) := get_parity_data_result(RESET_VALUE, DETECT_DOUBLE) & RESET_VALUE;
     signal enc_w : std_logic_vector(REG_DATA_WIDTH-1 downto 0);
     signal reg_r : std_logic_vector(REG_DATA_WIDTH-1 downto 0);
   begin
