@@ -23,24 +23,24 @@ entity harv is
     poweron_rstn_i : in std_logic;
     wdt_rstn_i     : in std_logic;
     -- INSTRUCTION MEMORY
-    imem_instr_i : in std_logic_vector(31 downto 0);
+    imem_instr_i : in  std_logic_vector(31 downto 0);
     imem_pc_o    : out std_logic_vector(31 downto 0);
     imem_req_o   : out std_logic;
-    imem_gnt_i   : in std_logic;
-    imem_err_i   : in std_logic;
+    imem_gnt_i   : in  std_logic;
+    imem_err_i   : in  std_logic;
     -- DATA MEMORY
-    hard_dmem_o       : out std_logic;
-    dmem_data_i       : in std_logic_vector(31 downto 0);
-    dmem_req_o        : out std_logic;
-    dmem_wren_o       : out std_logic;
-    dmem_gnt_i        : in std_logic;
-    dmem_outofrange_i : in std_logic;
-    dmem_sbu_i        : in std_logic;
-    dmem_dbu_i        : in std_logic;
-    dmem_byte_en_o    : out std_logic_vector(1 downto 0);
-    dmem_usgn_dat_o   : out std_logic;
-    dmem_data_o       : out std_logic_vector(31 downto 0);
-    dmem_addr_o       : out std_logic_vector(31 downto 0)
+    hard_dmem_o  : out std_logic;
+    dmem_req_o   : out std_logic;
+    dmem_wren_o  : out std_logic;
+    dmem_ben_o   : out std_logic_vector(1 downto 0);
+    dmem_usgn_o  : out std_logic;
+    dmem_addr_o  : out std_logic_vector(31 downto 0);
+    dmem_wdata_o : out std_logic_vector(31 downto 0);
+    dmem_gnt_i   : in  std_logic;
+    dmem_err_i   : in  std_logic;
+    dmem_sbu_i   : in  std_logic;
+    dmem_dbu_i   : in  std_logic;
+    dmem_rdata_i : in  std_logic_vector(31 downto 0)
   );
 end entity;
 
@@ -80,9 +80,9 @@ architecture arch of harv is
   signal ctl_jump_w           : std_logic;
   signal ctl_jalr_w           : std_logic;
   signal ctl_ecall_w          : std_logic;
-  signal ctl_memrd_w          : std_logic;
-  signal ctl_memwr_w          : std_logic;
-  signal ctl_byte_en_w        : std_logic_vector(1 downto 0);
+  signal ctl_mem_rd_w         : std_logic;
+  signal ctl_mem_wr_w         : std_logic;
+  signal ctl_mem_ben_w        : std_logic_vector(1 downto 0);
   signal ctl_mem_usgn_w       : std_logic;
   signal ctl_load_upimm_w     : std_logic;
   signal ctl_auipc_w          : std_logic;
@@ -92,9 +92,9 @@ architecture arch of harv is
   signal ctl_csr_clearop_w    : std_logic;
   signal instr_w              : std_logic_vector(31 downto 0);
   ------------- REGFILE  -------------
-  signal data_wr_w     : std_logic_vector(31 downto 0);
-  signal reg_data1_w   : std_logic_vector(31 downto 0);
-  signal reg_data2_w   : std_logic_vector(31 downto 0);
+  signal data_wr_w   : std_logic_vector(31 downto 0);
+  signal reg_data1_w : std_logic_vector(31 downto 0);
+  signal reg_data2_w : std_logic_vector(31 downto 0);
   -------------- ALU -----------------
   signal alu_data1_w : std_logic_vector(31 downto 0);
   signal alu_data2_w : std_logic_vector(31 downto 0);
@@ -115,8 +115,8 @@ architecture arch of harv is
   signal reg2_sbu_w : std_logic;
   signal reg2_dbu_w : std_logic;
   -- signal pc_cen_w   : std_logic;
-  signal pc_sbu_w   : std_logic;
-  signal pc_dbu_w   : std_logic;
+  signal pc_sbu_w : std_logic;
+  signal pc_dbu_w : std_logic;
 
   signal control_err_w : std_logic;
   signal alu_err_w     : std_logic;
@@ -131,25 +131,25 @@ begin
     HAMMING_PC            => HAMMING_PC
   )
   port map (
-    branch_imm_i   => imm_branch_w,
-    jump_imm_i     => alu_data_w,
-    inv_branch_i   => ctl_inv_branch_w,
-    branch_i       => ctl_branch_w,
-    zero_i         => alu_zero_w,
-    jump_i         => ctl_jump_w,
-    ecall_i        => ctl_ecall_w,
+    branch_imm_i    => imm_branch_w,
+    jump_imm_i      => alu_data_w,
+    inv_branch_i    => ctl_inv_branch_w,
+    branch_i        => ctl_branch_w,
+    zero_i          => alu_zero_w,
+    jump_i          => ctl_jump_w,
+    ecall_i         => ctl_ecall_w,
     correct_error_i => hard_pc_w,
-    instr_gnt_i    => imem_gnt_i,
-    instr_i        => imem_instr_i,
-    rstn_i         => rstn_i,
-    clk_i          => clk_w,
-    update_pc_i    => update_pc_w,
-    trap_i         => trap_w,
-    instr_o        => instr_w,
-    sbu_o          => pc_sbu_w,
-    dbu_o          => pc_dbu_w,
-    pc_o           => if_pc_w,
-    pc_4_o         => if_pc_4_w
+    instr_gnt_i     => imem_gnt_i,
+    instr_i         => imem_instr_i,
+    rstn_i          => rstn_i,
+    clk_i           => clk_w,
+    update_pc_i     => update_pc_w,
+    trap_i          => trap_w,
+    instr_o         => instr_w,
+    sbu_o           => pc_sbu_w,
+    dbu_o           => pc_dbu_w,
+    pc_o            => if_pc_w,
+    pc_4_o          => if_pc_4_w
   );
   imem_pc_o <= if_pc_w;
 
@@ -171,20 +171,20 @@ begin
       control_i : control_tmr
       port map (
         start_i          => start_i,
-        imem_gnt_i        => imem_gnt_i,
-        imem_err_i        => imem_err_i,
-        dmem_gnt_i        => dmem_gnt_i,
-        dmem_outofrange_i => dmem_outofrange_i,
-        dmem_sbu_i        => dmem_sbu_i and dmem_gnt_i and not ctl_memwr_w,
-        dmem_dbu_i        => dmem_dbu_i and dmem_gnt_i and not ctl_memwr_w,
+        imem_gnt_i       => imem_gnt_i,
+        imem_err_i       => imem_err_i,
+        dmem_gnt_i       => dmem_gnt_i,
+        dmem_err_i       => dmem_err_i,
+        dmem_sbu_i       => dmem_sbu_i and dmem_gnt_i and ctl_mem_rd_w,
+        dmem_dbu_i       => dmem_dbu_i and dmem_gnt_i and ctl_mem_rd_w,
         opcode_i         => opcode_w,
         funct3_i         => funct3_w,
         funct7_i         => funct7_w,
         funct12_i        => funct12_w,
         rstn_i           => rstn_i,
         clk_i            => clk_i,
-        imem_req_o        => imem_req_o,
-        dmem_req_o        => dmem_req_o,
+        imem_req_o       => imem_req_o,
+        dmem_req_o       => dmem_req_o,
         update_pc_o      => update_pc_w,
         trap_o           => trap_w,
         aluop_o          => ctl_aluop_w,
@@ -197,9 +197,9 @@ begin
         jump_o           => ctl_jump_w,
         jalr_o           => ctl_jalr_w,
         ecall_o          => ctl_ecall_w,
-        memrd_o          => ctl_memrd_w,
-        memwr_o          => ctl_memwr_w,
-        byte_en_o        => ctl_byte_en_w,
+        mem_rd_o         => ctl_mem_rd_w,
+        mem_wr_o         => ctl_mem_wr_w,
+        mem_ben_o        => ctl_mem_ben_w,
         mem_usgn_o       => ctl_mem_usgn_w,
         load_upimm_o     => ctl_load_upimm_w,
         auipc_o          => ctl_auipc_w,
@@ -215,57 +215,57 @@ begin
     control_i : control
     port map (
       -- processor status
-      start_i          => start_i,
-      imem_gnt_i        => imem_gnt_i,
-      imem_err_i        => imem_err_i,
-      dmem_gnt_i        => dmem_gnt_i,
-      dmem_outofrange_i => dmem_outofrange_i,
-      dmem_sbu_i        => dmem_sbu_i,
-      dmem_dbu_i        => dmem_dbu_i,
+      start_i    => start_i,
+      imem_gnt_i => imem_gnt_i,
+      imem_err_i => imem_err_i,
+      dmem_gnt_i => dmem_gnt_i,
+      dmem_err_i => dmem_err_i,
+      dmem_sbu_i => dmem_sbu_i,
+      dmem_dbu_i => dmem_dbu_i,
 
       -- instruction decode
-      opcode_i     => opcode_w,
-      funct3_i     => funct3_w,
-      funct7_i     => funct7_w,
-      funct12_i    => funct12_w,
+      opcode_i  => opcode_w,
+      funct3_i  => funct3_w,
+      funct7_i  => funct7_w,
+      funct12_i => funct12_w,
 
-      rstn_i       => rstn_i,
-      clk_i        => clk_i,
+      rstn_i => rstn_i,
+      clk_i  => clk_i,
 
       -- processor status
-      imem_req_o   => imem_req_o,
-      dmem_req_o   => dmem_req_o,
+      imem_req_o  => imem_req_o,
+      dmem_req_o  => dmem_req_o,
       update_pc_o => update_pc_w,
       trap_o      => trap_w,
 
       -- instruction decode
-      aluop_o           => ctl_aluop_w,
-      alusrc_imm_o      => ctl_alusrc_imm_w,
-      imm_shamt_o       => ctl_imm_shamt_w,
-      imm_up_o          => ctl_imm_up_w,
-      regwr_o           => ctl_regwr_w,
-      inv_branch_o      => ctl_inv_branch_w,
-      branch_o          => ctl_branch_w,
-      jump_o            => ctl_jump_w,
-      jalr_o            => ctl_jalr_w,
-      ecall_o           => ctl_ecall_w,
-      memrd_o           => ctl_memrd_w,
-      memwr_o           => ctl_memwr_w,
-      byte_en_o         => ctl_byte_en_w,
-      mem_usgn_o        => ctl_mem_usgn_w,
-      load_upimm_o      => ctl_load_upimm_w,
-      auipc_o           => ctl_auipc_w,
-      csr_enable_o      => ctl_csr_enable_w,
-      csr_source_imm_o  => ctl_csr_source_imm_w,
-      csr_maskop_o      => ctl_csr_maskop_w,
-      csr_clearop_o     => ctl_csr_clearop_w
+      aluop_o          => ctl_aluop_w,
+      alusrc_imm_o     => ctl_alusrc_imm_w,
+      imm_shamt_o      => ctl_imm_shamt_w,
+      imm_up_o         => ctl_imm_up_w,
+      regwr_o          => ctl_regwr_w,
+      inv_branch_o     => ctl_inv_branch_w,
+      branch_o         => ctl_branch_w,
+      jump_o           => ctl_jump_w,
+      jalr_o           => ctl_jalr_w,
+      ecall_o          => ctl_ecall_w,
+      mem_rd_o         => ctl_mem_rd_w,
+      mem_wr_o         => ctl_mem_wr_w,
+      mem_ben_o        => ctl_mem_ben_w,
+      mem_usgn_o       => ctl_mem_usgn_w,
+      load_upimm_o     => ctl_load_upimm_w,
+      auipc_o          => ctl_auipc_w,
+      csr_enable_o     => ctl_csr_enable_w,
+      csr_source_imm_o => ctl_csr_source_imm_w,
+      csr_maskop_o     => ctl_csr_maskop_w,
+      csr_clearop_o    => ctl_csr_clearop_w
     );
   end generate;
 
-  data_wr_w <= dmem_data_i  when ctl_memrd_w      = '1' else
-               imm_w       when ctl_load_upimm_w = '1' else
-               if_pc_4_w   when ctl_jump_w       = '1' else
-               csr_rdata_w when ctl_csr_enable_w = '1' else
+  data_wr_w <= dmem_rdata_i when ctl_mem_rd_w     = '1' else
+               imm_w        when ctl_load_upimm_w = '1' else
+               if_pc_4_w    when ctl_jump_w       = '1' else
+               csr_rdata_w  when ctl_csr_enable_w = '1' else
                alu_data_w;
 
   regfile_i : regfile
@@ -288,27 +288,26 @@ begin
     data2_o      => reg_data2_w
   );
 
- imm_sel_w <= ctl_imm_shamt_w & ctl_imm_up_w & ctl_memwr_w & (ctl_jump_w and not ctl_jalr_w);
+ imm_sel_w <= ctl_imm_shamt_w & ctl_imm_up_w & ctl_mem_wr_w & (ctl_jump_w and not ctl_jalr_w);
 
  with imm_sel_w select imm_w <=
    std_logic_vector(resize(unsigned(imm_shamt_w), 32))            when "1000", -- ctl_imm_shamt_w                 = '1' else
    std_logic_vector(shift_left(resize(signed(imm_up_w), 32), 12)) when "0100", -- ctl_imm_up_w                    = '1' else
-   std_logic_vector(resize(signed(imm_store_w), 32))              when "0010", -- ctl_memwr_w                     = '1' else
+   std_logic_vector(resize(signed(imm_store_w), 32))              when "0010", -- ctl_mem_wr_w                    = '1' else
    std_logic_vector(resize(signed(imm_upj_w),   32))              when "0001", -- (ctl_jump_w and not ctl_jalr_w) = '1' else
    std_logic_vector(resize(signed(imm_i_w),     32))              when others;
 
-  alu_data1_w <= if_pc_w     when (ctl_auipc_w or (ctl_jump_w and not ctl_jalr_w)) = '1' else
-                 reg_data1_w;
-  alu_data2_w <= imm_w   when ctl_alusrc_imm_w = '1' else reg_data2_w;
+  alu_data1_w <= if_pc_w when (ctl_auipc_w or (ctl_jump_w and not ctl_jalr_w)) = '1' else reg_data1_w;
+  alu_data2_w <= imm_w when ctl_alusrc_imm_w = '1' else reg_data2_w;
 
   gen_ft_alu : if TMR_ALU generate
     alu_i : alu_tmr
     port map (
-      data1_i     => alu_data1_w,
-      data2_i     => alu_data2_w,
-      operation_i => ctl_aluop_w,
-      zero_o      => alu_zero_w,
-      data_o      => alu_data_w,
+      data1_i         => alu_data1_w,
+      data2_i         => alu_data2_w,
+      operation_i     => ctl_aluop_w,
+      zero_o          => alu_zero_w,
+      data_o          => alu_data_w,
       correct_error_i => hard_alu_w,
       error_o         => alu_err_w
     );
@@ -325,10 +324,10 @@ begin
   end generate;
 
   ---------- CSR registers ---------
-  csr_ucause_w <= x"00000010" when dmem_sbu_i  = '1' else -- SBU
-                  x"00000020" when dmem_dbu_i  = '1' else -- DBU
-                  x"00000007" when ctl_memwr_w = '1' else -- store address fault
-                  x"00000005";                           -- load address fault
+  csr_ucause_w <= x"00000010" when dmem_sbu_i   = '1' else -- SBU
+                  x"00000020" when dmem_dbu_i   = '1' else -- DBU
+                  x"00000007" when ctl_mem_wr_w = '1' else -- store address fault
+                  x"00000005"; -- when ctl_mem_rd_w = '1'  -- load address fault
   csr_i : csr
   generic map (
     TMR_CONTROL     => TMR_CONTROL,
@@ -366,7 +365,7 @@ begin
     pc_cen_i       => update_pc_w,
     pc_sbu_i       => pc_sbu_w,
     pc_dbu_i       => pc_dbu_w,
-    dmem_cen_i     => dmem_gnt_i and not ctl_memwr_w,
+    dmem_cen_i     => dmem_gnt_i and not ctl_mem_wr_w,
     dmem_sbu_i     => dmem_sbu_i,
     dmem_dbu_i     => dmem_dbu_i,
     control_cen_i  => '1',
@@ -387,10 +386,10 @@ begin
   -------- DATA MEMORY --------
   -- output signals
   -- dmem_req_o is set by the control unit
-  dmem_wren_o     <= ctl_memwr_w;
-  dmem_byte_en_o  <= ctl_byte_en_w;
-  dmem_usgn_dat_o <= ctl_mem_usgn_w;
-  dmem_data_o     <= reg_data2_w;
-  dmem_addr_o     <= alu_data_w;
+  dmem_wren_o  <= ctl_mem_wr_w;
+  dmem_ben_o   <= ctl_mem_ben_w;
+  dmem_usgn_o  <= ctl_mem_usgn_w;
+  dmem_wdata_o <= reg_data2_w;
+  dmem_addr_o  <= alu_data_w;
 
 end architecture;

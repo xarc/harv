@@ -10,12 +10,12 @@ entity control_tmr is
   port (
     -- input ports
     -- processor status
-    imem_gnt_i        : in std_logic;
-    imem_err_i        : in std_logic;
-    dmem_gnt_i        : in std_logic;
-    dmem_outofrange_i : in std_logic;
-    dmem_sbu_i        : in std_logic;
-    dmem_dbu_i        : in std_logic;
+    imem_gnt_i : in std_logic;
+    imem_err_i : in std_logic;
+    dmem_gnt_i : in std_logic;
+    dmem_err_i : in std_logic;
+    dmem_sbu_i : in std_logic;
+    dmem_dbu_i : in std_logic;
 
     -- instruction decode
     opcode_i  : in std_logic_vector(6 downto 0);
@@ -49,7 +49,7 @@ entity control_tmr is
     imm_shamt_o : out std_logic;
     imm_up_o    : out std_logic;
     -- register bank
-    regwr_o  : out std_logic;
+    regwr_o : out std_logic;
     -- control transfer
     inv_branch_o : out std_logic;
     branch_o     : out std_logic;
@@ -57,9 +57,9 @@ entity control_tmr is
     jalr_o       : out std_logic;
     ecall_o      : out std_logic;
     -- mem access
-    memrd_o    : out std_logic;
-    memwr_o    : out std_logic;
-    byte_en_o  : out std_logic_vector(1 downto 0);
+    mem_rd_o   : out std_logic;
+    mem_wr_o   : out std_logic;
+    mem_ben_o  : out std_logic_vector(1 downto 0);
     mem_usgn_o : out std_logic; -- unsigned data
     -- U type
     load_upimm_o : out std_logic;
@@ -87,8 +87,8 @@ architecture arch of control_tmr is
   signal jump_w            : tmr_std_logic_t;
   signal jalr_w            : tmr_std_logic_t;
   signal ecall_w           : tmr_std_logic_t;
-  signal memrd_w           : tmr_std_logic_t;
-  signal memwr_w           : tmr_std_logic_t;
+  signal mem_rd_w           : tmr_std_logic_t;
+  signal mem_wr_w           : tmr_std_logic_t;
   signal mem_usgn_w        : tmr_std_logic_t;
   signal load_upimm_w      : tmr_std_logic_t;
   signal auipc_w           : tmr_std_logic_t;
@@ -110,8 +110,8 @@ architecture arch of control_tmr is
   signal corr_jump_w            : std_logic;
   signal corr_jalr_w            : std_logic;
   signal corr_ecall_w           : std_logic;
-  signal corr_memrd_w           : std_logic;
-  signal corr_memwr_w           : std_logic;
+  signal corr_mem_rd_w          : std_logic;
+  signal corr_mem_wr_w          : std_logic;
   signal corr_mem_usgn_w        : std_logic;
   signal corr_load_upimm_w      : std_logic;
   signal corr_auipc_w           : std_logic;
@@ -133,8 +133,8 @@ architecture arch of control_tmr is
   signal error_jump_w            : std_logic;
   signal error_jalr_w            : std_logic;
   signal error_ecall_w           : std_logic;
-  signal error_memrd_w           : std_logic;
-  signal error_memwr_w           : std_logic;
+  signal error_mem_rd_w          : std_logic;
+  signal error_mem_wr_w          : std_logic;
   signal error_mem_usgn_w        : std_logic;
   signal error_load_upimm_w      : std_logic;
   signal error_auipc_w           : std_logic;
@@ -149,9 +149,9 @@ architecture arch of control_tmr is
   signal error_aluop_w : std_logic;
 
   type tmr_std_logic_2_t is array(2 downto 0) of std_logic_vector(1 downto 0);
-  signal byte_en_w : tmr_std_logic_2_t;
-  signal corr_byte_en_w : std_logic_vector(1 downto 0);
-  signal error_byte_en_w : std_logic;
+  signal mem_ben_w : tmr_std_logic_2_t;
+  signal corr_mem_ben_w : std_logic_vector(1 downto 0);
+  signal error_mem_ben_w : std_logic;
 
 begin
   gen_TMR : for i in 2 downto 0 generate
@@ -170,43 +170,43 @@ begin
   begin
     control_i : control
     port map (
-      imem_gnt_i        => imem_gnt_i,
-      imem_err_i        => imem_err_i,
-      dmem_gnt_i        => dmem_gnt_i,
-      dmem_outofrange_i => dmem_outofrange_i,
-      dmem_sbu_i        => dmem_sbu_i,
-      dmem_dbu_i        => dmem_dbu_i,
-      opcode_i          => opcode_i,
-      funct3_i          => funct3_i,
-      funct7_i          => funct7_i,
-      funct12_i         => funct12_i,
-      rstn_i            => rstn_i,
-      clk_i             => clk_i,
-      start_i           => start_i,
-      imem_req_o        => imem_req_w(i),
-      dmem_req_o        => dmem_req_w(i),
-      update_pc_o       => update_pc_w(i),
-      trap_o            => trap_w(i),
-      aluop_o           => aluop_w(i),
-      alusrc_imm_o      => alusrc_imm_w(i),
-      imm_shamt_o       => imm_shamt_w(i),
-      imm_up_o          => imm_up_w(i),
-      regwr_o           => regwr_w(i),
-      inv_branch_o      => inv_branch_w(i),
-      branch_o          => branch_w(i),
-      jump_o            => jump_w(i),
-      jalr_o            => jalr_w(i),
-      ecall_o           => ecall_w(i),
-      memrd_o           => memrd_w(i),
-      memwr_o           => memwr_w(i),
-      byte_en_o         => byte_en_w(i),
-      mem_usgn_o        => mem_usgn_w(i),
-      load_upimm_o      => load_upimm_w(i),
-      auipc_o           => auipc_w(i),
-      csr_enable_o      => csr_enable_w(i),
-      csr_source_imm_o  => csr_source_imm_w(i),
-      csr_maskop_o      => csr_maskop_w(i),
-      csr_clearop_o     => csr_clearop_w(i)
+      imem_gnt_i       => imem_gnt_i,
+      imem_err_i       => imem_err_i,
+      dmem_gnt_i       => dmem_gnt_i,
+      dmem_err_i       => dmem_err_i,
+      dmem_sbu_i       => dmem_sbu_i,
+      dmem_dbu_i       => dmem_dbu_i,
+      opcode_i         => opcode_i,
+      funct3_i         => funct3_i,
+      funct7_i         => funct7_i,
+      funct12_i        => funct12_i,
+      rstn_i           => rstn_i,
+      clk_i            => clk_i,
+      start_i          => start_i,
+      imem_req_o       => imem_req_w(i),
+      dmem_req_o       => dmem_req_w(i),
+      update_pc_o      => update_pc_w(i),
+      trap_o           => trap_w(i),
+      aluop_o          => aluop_w(i),
+      alusrc_imm_o     => alusrc_imm_w(i),
+      imm_shamt_o      => imm_shamt_w(i),
+      imm_up_o         => imm_up_w(i),
+      regwr_o          => regwr_w(i),
+      inv_branch_o     => inv_branch_w(i),
+      branch_o         => branch_w(i),
+      jump_o           => jump_w(i),
+      jalr_o           => jalr_w(i),
+      ecall_o          => ecall_w(i),
+      mem_rd_o         => mem_rd_w(i),
+      mem_wr_o         => mem_wr_w(i),
+      mem_ben_o        => mem_ben_w(i),
+      mem_usgn_o       => mem_usgn_w(i),
+      load_upimm_o     => load_upimm_w(i),
+      auipc_o          => auipc_w(i),
+      csr_enable_o     => csr_enable_w(i),
+      csr_source_imm_o => csr_source_imm_w(i),
+      csr_maskop_o     => csr_maskop_w(i),
+      csr_clearop_o    => csr_clearop_w(i)
     );
   end generate;
 
@@ -224,9 +224,9 @@ begin
   corr_jump_w            <= (           jump_w(2) and            jump_w(1)) or (           jump_w(2) and            jump_w(0)) or (           jump_w(1) and            jump_w(0));
   corr_jalr_w            <= (           jalr_w(2) and            jalr_w(1)) or (           jalr_w(2) and            jalr_w(0)) or (           jalr_w(1) and            jalr_w(0));
   corr_ecall_w           <= (          ecall_w(2) and           ecall_w(1)) or (          ecall_w(2) and           ecall_w(0)) or (          ecall_w(1) and           ecall_w(0));
-  corr_memrd_w           <= (          memrd_w(2) and           memrd_w(1)) or (          memrd_w(2) and           memrd_w(0)) or (          memrd_w(1) and           memrd_w(0));
-  corr_memwr_w           <= (          memwr_w(2) and           memwr_w(1)) or (          memwr_w(2) and           memwr_w(0)) or (          memwr_w(1) and           memwr_w(0));
-  corr_byte_en_w         <= (        byte_en_w(2) and         byte_en_w(1)) or (        byte_en_w(2) and         byte_en_w(0)) or (        byte_en_w(1) and         byte_en_w(0));
+  corr_mem_rd_w          <= (         mem_rd_w(2) and          mem_rd_w(1)) or (         mem_rd_w(2) and          mem_rd_w(0)) or (         mem_rd_w(1) and          mem_rd_w(0));
+  corr_mem_wr_w          <= (         mem_wr_w(2) and          mem_wr_w(1)) or (         mem_wr_w(2) and          mem_wr_w(0)) or (         mem_wr_w(1) and          mem_wr_w(0));
+  corr_mem_ben_w         <= (        mem_ben_w(2) and         mem_ben_w(1)) or (        mem_ben_w(2) and         mem_ben_w(0)) or (        mem_ben_w(1) and         mem_ben_w(0));
   corr_mem_usgn_w        <= (       mem_usgn_w(2) and        mem_usgn_w(1)) or (       mem_usgn_w(2) and        mem_usgn_w(0)) or (       mem_usgn_w(1) and        mem_usgn_w(0));
   corr_load_upimm_w      <= (     load_upimm_w(2) and      load_upimm_w(1)) or (     load_upimm_w(2) and      load_upimm_w(0)) or (     load_upimm_w(1) and      load_upimm_w(0));
   corr_auipc_w           <= (          auipc_w(2) and           auipc_w(1)) or (          auipc_w(2) and           auipc_w(0)) or (          auipc_w(1) and           auipc_w(0));
@@ -249,9 +249,9 @@ begin
   error_jump_w            <= (           jump_w(2) xor           jump_w(1)) or (           jump_w(2) xor           jump_w(0)) or (           jump_w(1) xor            jump_w(0));
   error_jalr_w            <= (           jalr_w(2) xor           jalr_w(1)) or (           jalr_w(2) xor           jalr_w(0)) or (           jalr_w(1) xor            jalr_w(0));
   error_ecall_w           <= (          ecall_w(2) xor          ecall_w(1)) or (          ecall_w(2) xor          ecall_w(0)) or (          ecall_w(1) xor           ecall_w(0));
-  error_memrd_w           <= (          memrd_w(2) xor          memrd_w(1)) or (          memrd_w(2) xor          memrd_w(0)) or (          memrd_w(1) xor           memrd_w(0));
-  error_memwr_w           <= (          memwr_w(2) xor          memwr_w(1)) or (          memwr_w(2) xor          memwr_w(0)) or (          memwr_w(1) xor           memwr_w(0));
-  error_byte_en_w         <= or_reduce((        byte_en_w(2) xor        byte_en_w(1)) or (        byte_en_w(2) xor        byte_en_w(0)) or (        byte_en_w(1) xor         byte_en_w(0)));
+  error_mem_rd_w          <= (         mem_rd_w(2) xor         mem_rd_w(1)) or (         mem_rd_w(2) xor         mem_rd_w(0)) or (         mem_rd_w(1) xor          mem_rd_w(0));
+  error_mem_wr_w          <= (         mem_wr_w(2) xor         mem_wr_w(1)) or (         mem_wr_w(2) xor         mem_wr_w(0)) or (         mem_wr_w(1) xor          mem_wr_w(0));
+  error_mem_ben_w         <= or_reduce((mem_ben_w(2) xor mem_ben_w(1)) or (mem_ben_w(2) xor mem_ben_w(0)) or ( mem_ben_w(1) xor mem_ben_w(0)));
   error_mem_usgn_w        <= (       mem_usgn_w(2) xor       mem_usgn_w(1)) or (       mem_usgn_w(2) xor       mem_usgn_w(0)) or (       mem_usgn_w(1) xor        mem_usgn_w(0));
   error_load_upimm_w      <= (     load_upimm_w(2) xor     load_upimm_w(1)) or (     load_upimm_w(2) xor     load_upimm_w(0)) or (     load_upimm_w(1) xor      load_upimm_w(0));
   error_auipc_w           <= (          auipc_w(2) xor          auipc_w(1)) or (          auipc_w(2) xor          auipc_w(0)) or (          auipc_w(1) xor           auipc_w(0));
@@ -265,8 +265,8 @@ begin
              error_trap_w           or error_aluop_w      or error_alusrc_imm_w     or
              error_imm_shamt_w      or error_imm_up_w     or error_regwr_w          or
              error_inv_branch_w     or error_branch_w     or error_jump_w           or
-             error_jalr_w           or error_ecall_w      or error_memrd_w          or
-             error_memwr_w          or error_byte_en_w    or error_mem_usgn_w       or
+             error_jalr_w           or error_ecall_w      or error_mem_rd_w         or
+             error_mem_wr_w         or error_mem_ben_w    or error_mem_usgn_w       or
              error_load_upimm_w     or error_auipc_w      or error_csr_enable_w     or
              error_csr_source_imm_w or error_csr_maskop_w or error_csr_clearop_w;
 
@@ -285,9 +285,9 @@ begin
   jump_o           <= corr_jump_w           when correct_error_i = '1' else jump_w          (0);
   jalr_o           <= corr_jalr_w           when correct_error_i = '1' else jalr_w          (0);
   ecall_o          <= corr_ecall_w          when correct_error_i = '1' else ecall_w         (0);
-  memrd_o          <= corr_memrd_w          when correct_error_i = '1' else memrd_w         (0);
-  memwr_o          <= corr_memwr_w          when correct_error_i = '1' else memwr_w         (0);
-  byte_en_o        <= corr_byte_en_w        when correct_error_i = '1' else byte_en_w       (0);
+  mem_rd_o         <= corr_mem_rd_w         when correct_error_i = '1' else mem_rd_w        (0);
+  mem_wr_o         <= corr_mem_wr_w         when correct_error_i = '1' else mem_wr_w        (0);
+  mem_ben_o        <= corr_mem_ben_w        when correct_error_i = '1' else mem_ben_w       (0);
   mem_usgn_o       <= corr_mem_usgn_w       when correct_error_i = '1' else mem_usgn_w      (0);
   load_upimm_o     <= corr_load_upimm_w     when correct_error_i = '1' else load_upimm_w    (0);
   auipc_o          <= corr_auipc_w          when correct_error_i = '1' else auipc_w         (0);

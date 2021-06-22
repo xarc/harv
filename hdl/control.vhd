@@ -9,12 +9,12 @@ entity control is
   port (
     -- input ports
     -- processor status
-    imem_gnt_i        : in std_logic;
-    imem_err_i        : in std_logic;
-    dmem_gnt_i        : in std_logic;
-    dmem_outofrange_i : in std_logic;
-    dmem_sbu_i        : in std_logic;
-    dmem_dbu_i        : in std_logic;
+    imem_gnt_i : in std_logic;
+    imem_err_i : in std_logic;
+    dmem_gnt_i : in std_logic;
+    dmem_err_i : in std_logic;
+    dmem_sbu_i : in std_logic;
+    dmem_dbu_i : in std_logic;
 
     -- instruction decode
     opcode_i  : in std_logic_vector(6 downto 0);
@@ -29,8 +29,8 @@ entity control is
 
     -- output ports
     -- processor status
-    imem_req_o        : out std_logic;
-    dmem_req_o        : out std_logic;
+    imem_req_o : out std_logic;
+    dmem_req_o : out std_logic;
 
     update_pc_o : out std_logic;
     trap_o      : out std_logic;
@@ -42,7 +42,7 @@ entity control is
     imm_shamt_o : out std_logic;
     imm_up_o    : out std_logic;
     -- register bank
-    regwr_o  : out std_logic;
+    regwr_o : out std_logic;
     -- control transfer
     inv_branch_o : out std_logic;
     branch_o     : out std_logic;
@@ -50,9 +50,9 @@ entity control is
     jalr_o       : out std_logic;
     ecall_o      : out std_logic;
     -- mem access
-    memrd_o    : out std_logic;
-    memwr_o    : out std_logic;
-    byte_en_o  : out std_logic_vector(1 downto 0);
+    mem_rd_o   : out std_logic;
+    mem_wr_o   : out std_logic;
+    mem_ben_o  : out std_logic_vector(1 downto 0);
     mem_usgn_o : out std_logic; -- unsigned data
     -- U type
     load_upimm_o : out std_logic;
@@ -102,9 +102,9 @@ architecture arch of control is
   constant SYS_CSRRCI : std_logic_vector(2 downto 0) := "111";
 
   -- auxiliar signals
-  signal memwr_w      : std_logic;
-  signal memrd_w      : std_logic;
-  signal memreq_w     : std_logic;
+  signal mem_wr_w : std_logic;
+  signal mem_rd_w : std_logic;
+  signal mem_req_w : std_logic;
 
   -- opcodes
 
@@ -121,7 +121,7 @@ begin
   imem_req_o <= '1' when proc_status_r = STAT_REQ_INSTR else '0';
 
   -- STAT_DMEM_STALL
-  memreq_w <= memrd_w or memwr_w;
+  mem_req_w <= mem_rd_w or mem_wr_w;
   dmem_req_o <= '1' when proc_status_r = STAT_DMEM_STALL else '0';
 
   -- STAT_UPDATE_PC
@@ -140,7 +140,7 @@ begin
     end if;
   end process;
 
-  PROC_NEXT_STATUS : process(proc_status_r, start_i, imem_gnt_i, imem_err_i, dmem_outofrange_i, memreq_w, dmem_gnt_i)
+  PROC_NEXT_STATUS : process(proc_status_r, start_i, imem_gnt_i, imem_err_i, dmem_err_i, mem_req_w, dmem_gnt_i)
   begin
     case proc_status_r is
 
@@ -163,14 +163,14 @@ begin
         end if;
 
       when STAT_RUN =>
-        if memreq_w = '1' then
+        if mem_req_w = '1' then
           next_proc_status_w <= STAT_DMEM_STALL;
         else
           next_proc_status_w <= STAT_UPDATE_PC;
         end if;
 
       when STAT_DMEM_STALL =>
-        if dmem_outofrange_i = '1' then -- or dmem_sbu_i = '1' or dmem_dbu_i = '1' then
+        if dmem_err_i = '1' then -- or dmem_sbu_i = '1' or dmem_dbu_i = '1' then
           next_proc_status_w <= STAT_TRAP;
         elsif dmem_gnt_i = '1' then
           next_proc_status_w <= STAT_UPDATE_PC;
@@ -262,11 +262,11 @@ begin
   ecall_o  <= '0'; -- '1' when instr_format_w = I_system else
 
   ------------------------------ MEM ACCESS ---------------------------------
-  memrd_w <= '1' when instr_format_w = I_load else '0';
-  memrd_o <= memrd_w;
-  memwr_w <= '1' when instr_format_w = S else '0';
-  memwr_o <= memwr_w;
-  byte_en_o  <= funct3_i(1 downto 0) when funct3_i(1) = '0' else "11"; -- byte or halfword -- else word
+  mem_rd_w   <= '1' when instr_format_w = I_load else '0';
+  mem_rd_o   <= mem_rd_w;
+  mem_wr_w   <= '1' when instr_format_w = S else '0';
+  mem_wr_o   <= mem_wr_w;
+  mem_ben_o  <= funct3_i(1 downto 0) when funct3_i(1) = '0' else "11"; -- byte or halfword -- else word
   mem_usgn_o <= funct3_i(2);
 
   -------------------------------- U type -----------------------------------

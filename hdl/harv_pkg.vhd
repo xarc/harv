@@ -20,85 +20,85 @@ package harv_pkg is
   ------- COMPONENTS -----
   component harv
   generic (
-    PROGRAM_START_ADDR    : std_logic_vector(31 downto 0);
-    TRAP_HANDLER_ADDR     : std_logic_vector(31 downto 0);
-    TMR_CONTROL           : boolean;
-    TMR_ALU               : boolean;
-    HAMMING_REGFILE       : boolean;
-    HAMMING_PC            : boolean
+    PROGRAM_START_ADDR : std_logic_vector(31 downto 0);
+    TRAP_HANDLER_ADDR  : std_logic_vector(31 downto 0);
+    TMR_CONTROL        : boolean;
+    TMR_ALU            : boolean;
+    HAMMING_REGFILE    : boolean;
+    HAMMING_PC         : boolean
   );
   port (
-    rstn_i           : in  std_logic;
-    clk_i            : in  std_logic;
-    start_i          : in  std_logic;
-    poweron_rstn_i   : in  std_logic;
-    wdt_rstn_i       : in  std_logic;
-    imem_instr_i      : in  std_logic_vector(31 downto 0);
-    imem_pc_o         : out std_logic_vector(31 downto 0);
-    imem_req_o        : out std_logic;
-    imem_gnt_i        : in  std_logic;
-    imem_err_i        : in  std_logic;
-    hard_dmem_o      : out std_logic;
-    dmem_data_i       : in  std_logic_vector(31 downto 0);
-    dmem_req_o        : out std_logic;
-    dmem_wren_o       : out std_logic;
-    dmem_gnt_i        : in  std_logic;
-    dmem_outofrange_i : in  std_logic;
-    dmem_sbu_i        : in  std_logic;
-    dmem_dbu_i        : in  std_logic;
-    dmem_byte_en_o    : out std_logic_vector(1 downto 0);
-    dmem_usgn_dat_o   : out std_logic;
-    dmem_data_o       : out std_logic_vector(31 downto 0);
-    dmem_addr_o       : out std_logic_vector(31 downto 0)
+    rstn_i         : in  std_logic;
+    clk_i          : in  std_logic;
+    start_i        : in  std_logic;
+    poweron_rstn_i : in  std_logic;
+    wdt_rstn_i     : in  std_logic;
+    imem_instr_i   : in  std_logic_vector(31 downto 0);
+    imem_pc_o      : out std_logic_vector(31 downto 0);
+    imem_req_o     : out std_logic;
+    imem_gnt_i     : in  std_logic;
+    imem_err_i     : in  std_logic;
+    hard_dmem_o    : out std_logic;
+    dmem_req_o     : out std_logic;
+    dmem_wren_o    : out std_logic;
+    dmem_ben_o     : out std_logic_vector(1 downto 0);
+    dmem_usgn_o    : out std_logic;
+    dmem_addr_o    : out std_logic_vector(31 downto 0);
+    dmem_wdata_o   : out std_logic_vector(31 downto 0);
+    dmem_gnt_i     : in  std_logic;
+    dmem_err_i     : in  std_logic;
+    dmem_sbu_i     : in  std_logic;
+    dmem_dbu_i     : in  std_logic;
+    dmem_rdata_i   : in  std_logic_vector(31 downto 0)
   );
   end component harv;
 
   component control
   port (
-    imem_gnt_i        : in  std_logic;
-    imem_err_i        : in  std_logic;
-    dmem_gnt_i        : in  std_logic;
-    dmem_outofrange_i : in  std_logic;
-    dmem_sbu_i        : in  std_logic;
-    dmem_dbu_i        : in  std_logic;
-    opcode_i          : in  std_logic_vector(6 downto 0);
-    funct3_i          : in  std_logic_vector(2 downto 0);
-    funct7_i          : in  std_logic_vector(6 downto 0);
-    funct12_i         : in  std_logic_vector(11 downto 0);
-    rstn_i            : in  std_logic;
-    clk_i             : in  std_logic;
-    start_i           : in  std_logic;
-    imem_req_o        : out std_logic;
-    dmem_req_o        : out std_logic;
-    update_pc_o       : out std_logic;
-    trap_o            : out std_logic;
-    aluop_o           : out std_logic_vector(ALUOP_SIZE-1 downto 0);
-    alusrc_imm_o      : out std_logic;
-    imm_shamt_o       : out std_logic;
-    imm_up_o          : out std_logic;
-    regwr_o           : out std_logic;
-    inv_branch_o      : out std_logic;
-    branch_o          : out std_logic;
-    jump_o            : out std_logic;
-    jalr_o            : out std_logic;
-    ecall_o           : out std_logic;
-    memrd_o           : out std_logic;
-    memwr_o           : out std_logic;
-    byte_en_o         : out std_logic_vector(1 downto 0);
-    mem_usgn_o        : out std_logic;
-    load_upimm_o      : out std_logic;
-    auipc_o           : out std_logic;
-    csr_enable_o      : out std_logic;
-    csr_source_imm_o  : out std_logic;
-    csr_maskop_o      : out std_logic;
-    csr_clearop_o     : out std_logic
+    imem_gnt_i       : in  std_logic;
+    imem_err_i       : in  std_logic;
+    dmem_gnt_i       : in  std_logic;
+    dmem_err_i       : in  std_logic;
+    dmem_sbu_i       : in  std_logic;
+    dmem_dbu_i       : in  std_logic;
+    opcode_i         : in  std_logic_vector(6 downto 0);
+    funct3_i         : in  std_logic_vector(2 downto 0);
+    funct7_i         : in  std_logic_vector(6 downto 0);
+    funct12_i        : in  std_logic_vector(11 downto 0);
+    rstn_i           : in  std_logic;
+    clk_i            : in  std_logic;
+    start_i          : in  std_logic;
+    imem_req_o       : out std_logic;
+    dmem_req_o       : out std_logic;
+    update_pc_o      : out std_logic;
+    trap_o           : out std_logic;
+    aluop_o          : out std_logic_vector(ALUOP_SIZE-1 downto 0);
+    alusrc_imm_o     : out std_logic;
+    imm_shamt_o      : out std_logic;
+    imm_up_o         : out std_logic;
+    regwr_o          : out std_logic;
+    inv_branch_o     : out std_logic;
+    branch_o         : out std_logic;
+    jump_o           : out std_logic;
+    jalr_o           : out std_logic;
+    ecall_o          : out std_logic;
+    mem_rd_o         : out std_logic;
+    mem_wr_o         : out std_logic;
+    mem_ben_o        : out std_logic_vector(1 downto 0);
+    mem_usgn_o       : out std_logic;
+    load_upimm_o     : out std_logic;
+    auipc_o          : out std_logic;
+    csr_enable_o     : out std_logic;
+    csr_source_imm_o : out std_logic;
+    csr_maskop_o     : out std_logic;
+    csr_clearop_o    : out std_logic
   );
   end component control;
 
   component instr_fetch
   generic (
-    PROGRAM_START_ADDR    : std_logic_vector;
-    TRAP_HANDLER_ADDR     : std_logic_vector;
+    PROGRAM_START_ADDR    : std_logic_vector(31 downto 0);
+    TRAP_HANDLER_ADDR     : std_logic_vector(31 downto 0);
     HAMMING_PC            : boolean
   );
   port (
@@ -208,45 +208,45 @@ package harv_pkg is
   ------------- FAULT TOLERANT COMPONENTS --------------------
   component control_tmr
   port (
-    imem_gnt_i        : in  std_logic;
-    imem_err_i        : in  std_logic;
-    dmem_gnt_i        : in  std_logic;
-    dmem_outofrange_i : in  std_logic;
-    dmem_sbu_i        : in  std_logic;
-    dmem_dbu_i        : in  std_logic;
-    opcode_i          : in  std_logic_vector(6 downto 0);
-    funct3_i          : in  std_logic_vector(2 downto 0);
-    funct7_i          : in  std_logic_vector(6 downto 0);
-    funct12_i         : in  std_logic_vector(11 downto 0);
-    correct_error_i   : in  std_logic;
-    rstn_i            : in  std_logic;
-    clk_i             : in  std_logic;
-    start_i           : in  std_logic;
-    imem_req_o        : out std_logic;
-    dmem_req_o        : out std_logic;
-    update_pc_o       : out std_logic;
-    trap_o            : out std_logic;
-    error_o           : out std_logic;
-    aluop_o           : out std_logic_vector(ALUOP_SIZE-1 downto 0);
-    alusrc_imm_o      : out std_logic;
-    imm_shamt_o       : out std_logic;
-    imm_up_o          : out std_logic;
-    regwr_o           : out std_logic;
-    inv_branch_o      : out std_logic;
-    branch_o          : out std_logic;
-    jump_o            : out std_logic;
-    jalr_o            : out std_logic;
-    ecall_o           : out std_logic;
-    memrd_o           : out std_logic;
-    memwr_o           : out std_logic;
-    byte_en_o         : out std_logic_vector(1 downto 0);
-    mem_usgn_o        : out std_logic;
-    load_upimm_o      : out std_logic;
-    auipc_o           : out std_logic;
-    csr_enable_o      : out std_logic;
-    csr_source_imm_o  : out std_logic;
-    csr_maskop_o      : out std_logic;
-    csr_clearop_o     : out std_logic
+    imem_gnt_i       : in  std_logic;
+    imem_err_i       : in  std_logic;
+    dmem_gnt_i       : in  std_logic;
+    dmem_err_i       : in  std_logic;
+    dmem_sbu_i       : in  std_logic;
+    dmem_dbu_i       : in  std_logic;
+    opcode_i         : in  std_logic_vector(6 downto 0);
+    funct3_i         : in  std_logic_vector(2 downto 0);
+    funct7_i         : in  std_logic_vector(6 downto 0);
+    funct12_i        : in  std_logic_vector(11 downto 0);
+    correct_error_i  : in  std_logic;
+    rstn_i           : in  std_logic;
+    clk_i            : in  std_logic;
+    start_i          : in  std_logic;
+    imem_req_o       : out std_logic;
+    dmem_req_o       : out std_logic;
+    update_pc_o      : out std_logic;
+    trap_o           : out std_logic;
+    error_o          : out std_logic;
+    aluop_o          : out std_logic_vector(ALUOP_SIZE-1 downto 0);
+    alusrc_imm_o     : out std_logic;
+    imm_shamt_o      : out std_logic;
+    imm_up_o         : out std_logic;
+    regwr_o          : out std_logic;
+    inv_branch_o     : out std_logic;
+    branch_o         : out std_logic;
+    jump_o           : out std_logic;
+    jalr_o           : out std_logic;
+    ecall_o          : out std_logic;
+    mem_rd_o         : out std_logic;
+    mem_wr_o         : out std_logic;
+    mem_ben_o        : out std_logic_vector(1 downto 0);
+    mem_usgn_o       : out std_logic;
+    load_upimm_o     : out std_logic;
+    auipc_o          : out std_logic;
+    csr_enable_o     : out std_logic;
+    csr_source_imm_o : out std_logic;
+    csr_maskop_o     : out std_logic;
+    csr_clearop_o    : out std_logic
   );
   end component control_tmr;
 
