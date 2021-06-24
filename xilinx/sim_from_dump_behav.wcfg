@@ -12,15 +12,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0fs"></ZoomStartTime>
-      <ZoomEndTime time="4890001fs"></ZoomEndTime>
-      <Cursor1Time time="2070000fs"></Cursor1Time>
+      <ZoomStartTime time="42035834fs"></ZoomStartTime>
+      <ZoomEndTime time="44520835fs"></ZoomEndTime>
+      <Cursor1Time time="43030834fs"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="204"></NameColumnWidth>
+      <NameColumnWidth column_width="196"></NameColumnWidth>
       <ValueColumnWidth column_width="66"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="28" />
+   <WVObjectSize size="34" />
    <wvobject type="array" fp_name="/sim_from_dump/INST_DUMP_FILE_PATH">
       <obj_property name="ElementShortName">INST_DUMP_FILE_PATH[1:33]</obj_property>
       <obj_property name="ObjectShortName">INST_DUMP_FILE_PATH[1:33]</obj_property>
@@ -90,7 +90,7 @@
       <obj_property name="ElementShortName">[5][31:0]</obj_property>
       <obj_property name="ObjectShortName">[5][31:0]</obj_property>
       <obj_property name="label">reg_t0</obj_property>
-      <obj_property name="Radix">SIGNEDDECRADIX</obj_property>
+      <obj_property name="Radix">HEXRADIX</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/sim_from_dump/harv_i/regfile_i/g_normal/regfile_w">
       <obj_property name="ElementShortName">regfile_w[31:0][31:0]</obj_property>
@@ -111,6 +111,30 @@
    <wvobject type="logic" fp_name="/sim_from_dump/harv_i/regfile_i/wren_i">
       <obj_property name="ElementShortName">wren_i</obj_property>
       <obj_property name="ObjectShortName">wren_i</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/sim_from_dump/harv_i/instr_fetch_i/jump_i">
+      <obj_property name="ElementShortName">jump_i</obj_property>
+      <obj_property name="ObjectShortName">jump_i</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_from_dump/harv_i/instr_fetch_i/jump_imm_i">
+      <obj_property name="ElementShortName">jump_imm_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">jump_imm_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_from_dump/harv_i/imm_i_w">
+      <obj_property name="ElementShortName">imm_i_w[11:0]</obj_property>
+      <obj_property name="ObjectShortName">imm_i_w[11:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_from_dump/harv_i/imm_w">
+      <obj_property name="ElementShortName">imm_w[31:0]</obj_property>
+      <obj_property name="ObjectShortName">imm_w[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_from_dump/harv_i/ctl_aluop_w">
+      <obj_property name="ElementShortName">ctl_aluop_w[3:0]</obj_property>
+      <obj_property name="ObjectShortName">ctl_aluop_w[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/sim_from_dump/harv_i/alu_data_w">
+      <obj_property name="ElementShortName">alu_data_w[31:0]</obj_property>
+      <obj_property name="ObjectShortName">alu_data_w[31:0]</obj_property>
    </wvobject>
    <wvobject fp_name="divider12648" type="divider">
       <obj_property name="label">MEMORIES</obj_property>
@@ -143,7 +167,6 @@
    <wvobject type="group" fp_name="group4275">
       <obj_property name="label">dmem</obj_property>
       <obj_property name="DisplayName">label</obj_property>
-      <obj_property name="isExpanded"></obj_property>
       <wvobject type="array" fp_name="/sim_from_dump/dmem_data_i">
          <obj_property name="ElementShortName">dmem_data_i[31:0]</obj_property>
          <obj_property name="ObjectShortName">dmem_data_i[31:0]</obj_property>
