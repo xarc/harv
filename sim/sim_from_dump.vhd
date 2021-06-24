@@ -27,21 +27,21 @@ architecture arch of sim_from_dump is
   signal data_mem : mem_t(DATA_SIZE + DATA_BASE_ADDR - 1 downto DATA_BASE_ADDR);
 
   -- instruction memory interface
-  signal imem_instr_i      : std_logic_vector(31 downto 0);
-  signal imem_pc_o         : std_logic_vector(31 downto 0);
-  signal imem_req_o        : std_logic;
-  signal imem_gnt_i        : std_logic;
+  signal imem_instr_i : std_logic_vector(31 downto 0);
+  signal imem_pc_o    : std_logic_vector(31 downto 0);
+  signal imem_req_o   : std_logic;
+  signal imem_gnt_i   : std_logic;
 
   -- data memory interface
-  signal dmem_data_i       : std_logic_vector(31 downto 0);
-  signal dmem_req_o        : std_logic;
-  signal dmem_wren_o       : std_logic;
-  signal dmem_gnt_i        : std_logic;
-  signal dmem_outofrange_i : std_logic;
-  signal dmem_byte_en_o    : std_logic_vector(1 downto 0);
-  signal dmem_usgn_dat_o   : std_logic;
-  signal dmem_data_o       : std_logic_vector(31 downto 0);
-  signal dmem_addr_o       : std_logic_vector(31 downto 0);
+  signal dmem_rdata_i : std_logic_vector(31 downto 0);
+  signal dmem_req_o   : std_logic;
+  signal dmem_wren_o  : std_logic;
+  signal dmem_gnt_i   : std_logic;
+  signal dmem_err_i   : std_logic;
+  signal dmem_ben_o   : std_logic_vector(1 downto 0);
+  signal dmem_usgn_o  : std_logic;
+  signal dmem_wdata_o : std_logic_vector(31 downto 0);
+  signal dmem_addr_o  : std_logic_vector(31 downto 0);
 
   constant INST_DUMP_FILE_PATH : string := "../../../../../src/test_text.dump";
   constant DATA_DUMP_FILE_PATH : string := "../../../../../src/test_data.dump";
@@ -97,28 +97,28 @@ begin
     HAMMING_PC         => FALSE
   )
   port map (
-    rstn_i            => rstn,
-    clk_i             => clk,
-    start_i           => start,
-    poweron_rstn_i    => rstn,
-    wdt_rstn_i        => '1',
-    imem_instr_i      => imem_instr_i,
-    imem_pc_o         => imem_pc_o,
-    imem_req_o        => imem_req_o,
-    imem_gnt_i        => imem_gnt_i,
-    imem_err_i        => '0',
-    hard_dmem_o       => open,
-    dmem_data_i       => dmem_data_i,
-    dmem_req_o        => dmem_req_o,
-    dmem_wren_o       => dmem_wren_o,
-    dmem_gnt_i        => dmem_gnt_i,
-    dmem_outofrange_i => dmem_outofrange_i,
-    dmem_sbu_i        => '0',
-    dmem_dbu_i        => '0',
-    dmem_byte_en_o    => dmem_byte_en_o,
-    dmem_usgn_dat_o   => dmem_usgn_dat_o,
-    dmem_data_o       => dmem_data_o,
-    dmem_addr_o       => dmem_addr_o
+    rstn_i         => rstn,
+    clk_i          => clk,
+    start_i        => start,
+    poweron_rstn_i => rstn,
+    wdt_rstn_i     => '1',
+    imem_instr_i   => imem_instr_i,
+    imem_pc_o      => imem_pc_o,
+    imem_req_o     => imem_req_o,
+    imem_gnt_i     => imem_gnt_i,
+    imem_err_i     => '0',
+    hard_dmem_o    => open,
+    dmem_rdata_i   => dmem_rdata_i,
+    dmem_req_o     => dmem_req_o,
+    dmem_wren_o    => dmem_wren_o,
+    dmem_gnt_i     => dmem_gnt_i,
+    dmem_err_i     => dmem_err_i,
+    dmem_sbu_i     => '0',
+    dmem_dbu_i     => '0',
+    dmem_ben_o     => dmem_ben_o,
+    dmem_usgn_o    => dmem_usgn_o,
+    dmem_wdata_o   => dmem_wdata_o,
+    dmem_addr_o    => dmem_addr_o
   );
 
   -- INSTRUCTION MEMORY ACCESS
@@ -164,9 +164,9 @@ begin
     -- infinite loop to provide data memory access
     loop
       -- disable grant signal
-      dmem_gnt_i <= '0';
-      dmem_data_i <= (others => 'X');
-      dmem_outofrange_i <= '0';
+      dmem_gnt_i   <= '0';
+      dmem_rdata_i <= (others => 'X');
+      dmem_err_i   <= '0';
       -- wait memory request
       wait until rising_edge(clk) and dmem_req_o = '1';
       -- wait 1 cycle to give response
@@ -175,34 +175,34 @@ begin
       addr_v := to_integer(unsigned(dmem_addr_o));
       -- check if range is ok
       if addr_v < DATA_BASE_ADDR or addr_v > (DATA_BASE_ADDR + DATA_SIZE) then
-        dmem_outofrange_i <= '1';
+        dmem_err_i <= '1';
       else
         -- grant response
         dmem_gnt_i <= '1';
         -- if it will perform a write
         if dmem_wren_o = '1' then
           -- write the first byte
-          data_mem(addr_v) <= dmem_data_o(7 downto 0);
+          data_mem(addr_v) <= dmem_wdata_o(7 downto 0);
           -- write the second byte for half-word and word
-          if dmem_byte_en_o(0) = '1' then
-            data_mem(addr_v+1) <= dmem_data_o(15 downto 8);
+          if dmem_ben_o(0) = '1' then
+            data_mem(addr_v+1) <= dmem_wdata_o(15 downto 8);
           end if;
           -- write the upper 16 bits, only for full word
-          if dmem_byte_en_o(1) = '1' then
-            data_mem(addr_v+2) <= dmem_data_o(23 downto 16);
-            data_mem(addr_v+3) <= dmem_data_o(31 downto 24);
+          if dmem_ben_o(1) = '1' then
+            data_mem(addr_v+2) <= dmem_wdata_o(23 downto 16);
+            data_mem(addr_v+3) <= dmem_wdata_o(31 downto 24);
           end if;
 
         -- read data memory
         else
           -- case between all acess possibilities
-          case dmem_byte_en_o is
+          case dmem_ben_o is
             -- byte read with and without sign-extension
             when "00" =>
-              if dmem_usgn_dat_o = '1' then
-                dmem_data_i <= x"000000" & data_mem(addr_v);
+              if dmem_usgn_o = '1' then
+                dmem_rdata_i <= x"000000" & data_mem(addr_v);
               else
-                dmem_data_i <= (
+                dmem_rdata_i <= (
                   31 downto 8 => data_mem(addr_v)(7),
                    7 downto 0 => data_mem(0)
                 );
@@ -210,19 +210,19 @@ begin
 
             -- half-word read with and without sign-extension
             when "01" =>
-              if dmem_usgn_dat_o = '1' then
-                dmem_data_i <= (
+              if dmem_usgn_o = '1' then
+                dmem_rdata_i <= (
                   31 downto 16 => data_mem(addr_v + 1)(7),
                   15 downto  8 => data_mem(addr_v + 1),
                    7 downto  0 => data_mem(addr_v)
                 );
               else
-                dmem_data_i <= x"000000" & data_mem(addr_v);
+                dmem_rdata_i <= x"000000" & data_mem(addr_v);
               end if;
 
             -- word read - concatanate bytes
             when "11" =>
-              dmem_data_i <= data_mem(addr_v + 3) &
+              dmem_rdata_i <= data_mem(addr_v + 3) &
                              data_mem(addr_v + 2) &
                              data_mem(addr_v + 1) &
                              data_mem(addr_v);
