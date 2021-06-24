@@ -41,8 +41,8 @@ entity control is
     -- immediate selector
     imm_shamt_o : out std_logic;
     imm_up_o    : out std_logic;
-    -- register bank
-    regwr_o : out std_logic;
+    -- register file
+    regwr_o  : out std_logic;
     -- control transfer
     inv_branch_o : out std_logic;
     branch_o     : out std_logic;
@@ -79,18 +79,19 @@ architecture arch of control is
   signal next_proc_status_w : proc_status_t;
 
   -------- INSTRUCTION DECODE ----------
-  subtype instr_format_t is std_logic_vector(3 downto 0);
-  constant R        : instr_format_t := x"1";
-  constant I_jalr   : instr_format_t := x"2";
-  constant I_load   : instr_format_t := x"3";
-  constant I_arith  : instr_format_t := x"4";
-  constant I_fence  : instr_format_t := x"5";
-  constant I_system : instr_format_t := x"6";
-  constant S        : instr_format_t := x"7";
-  constant B        : instr_format_t := x"8";
-  constant U_lui    : instr_format_t := x"9";
-  constant U_auipc  : instr_format_t := x"A";
-  constant U_jal    : instr_format_t := x"B";
+  constant R        : std_logic_vector(3 downto 0) := x"1";
+  constant I_jalr   : std_logic_vector(3 downto 0) := x"2";
+  constant I_load   : std_logic_vector(3 downto 0) := x"3";
+  constant I_arith  : std_logic_vector(3 downto 0) := x"4";
+  constant I_fence  : std_logic_vector(3 downto 0) := x"5";
+  constant I_system : std_logic_vector(3 downto 0) := x"6";
+  constant S        : std_logic_vector(3 downto 0) := x"7";
+  constant B        : std_logic_vector(3 downto 0) := x"8";
+  constant U_lui    : std_logic_vector(3 downto 0) := x"9";
+  constant U_auipc  : std_logic_vector(3 downto 0) := x"A";
+  constant U_jal    : std_logic_vector(3 downto 0) := x"B";
+
+  signal instr_format_w : std_logic_vector(3 downto 0);
 
   --- CSR TYPES ---
   constant SYS_ECALL  : std_logic_vector(2 downto 0) := "000";
@@ -106,14 +107,10 @@ architecture arch of control is
   signal mem_rd_w : std_logic;
   signal mem_req_w : std_logic;
 
-  -- opcodes
-
-  signal instr_format_w : instr_format_t;
-
   -- signal rshift_op_w   : std_logic_vector(ALUOP_SIZE-1 downto 0);
   -- signal add_op_w      : std_logic_vector(ALUOP_SIZE-1 downto 0);
-  signal arith_aluop_w : std_logic_vector(ALUOP_SIZE-1 downto 0);
-  signal branch_op_w   : std_logic_vector(ALUOP_SIZE-1 downto 0);
+  signal aluop_w     : std_logic_vector(ALUOP_SIZE-1 downto 0);
+  signal branch_op_w : std_logic_vector(ALUOP_SIZE-1 downto 0);
 
 begin
   ------------------------- PROCESSOR STATUS ------------------------------
@@ -205,44 +202,30 @@ begin
     U_jal           when "1101111",
     (others => '0') when others;
   --------------------------------- ALU -----------------------------------
-  -- rshift_op_w <= ALU_SRL_OP when funct7_i = "0000000" else ALU_SRA_OP;
-  -- add_op_w    <= ALU_SUB_OP when funct7_i = "0100000" and instr_format_w = R else ALU_ADD_OP;
-  --
-  -- with funct3_i select arith_aluop_w <=
-  --   add_op_w        when "000",
-  --   ALU_SLL_OP      when "001",
-  --   ALU_SLT_OP      when "010",
-  --   ALU_SLTU_OP     when "011",
-  --   ALU_XOR_OP      when "100",
-  --   rshift_op_w     when "101",
-  --   ALU_OR_OP       when "110",
-  --   ALU_AND_OP      when "111",
-  --   (others => '0') when others;
-  arith_aluop_w <= funct7_i(5) & funct3_i;
 
   with funct3_i(2 downto 1) select branch_op_w <=
     ALU_XOR_OP  when "00", -- beq  or bne
     ALU_SLT_OP  when "10", -- blt  or bge
     ALU_SLTU_OP when "11", -- bltu or bgeu
-    (others => '0') when others;
+    ALU_XOR_OP  when others; -- not in specification
 
-  aluop_o <= arith_aluop_w when instr_format_w = I_arith or
-                                instr_format_w = R       else
-             branch_op_w   when instr_format_w = B       else
+  aluop_w <= "0"         & funct3_i when instr_format_w = I_arith else
+             funct7_i(5) & funct3_i when instr_format_w = R       else
+             branch_op_w            when instr_format_w = B       else
              ALU_ADD_OP; -- when instr_format_w = U_auipc, I_load, S
+  aluop_o <= aluop_w;
   alusrc_imm_o <= '1' when instr_format_w /= R and instr_format_w /= B else '0';
 
   ------------------------ IMMEDIATE SELECTOR ------------------------------
   -- instr[24:20]
-  imm_shamt_o <= '1' when (arith_aluop_w = ALU_SLL_OP  or
-                           arith_aluop_w = ALU_SRL_OP  or
-                           arith_aluop_w = ALU_SRA_OP) and
-                           instr_format_w = I_arith else '0';
+  imm_shamt_o <= '1' when (aluop_w = ALU_SLL_OP  or
+                           aluop_w = ALU_SRL_OP  or
+                           aluop_w = ALU_SRA_OP) else '0';
   -- instr[31:12] -> imm[31:12]
   imm_up_o <= '1' when instr_format_w = U_lui   or
                        instr_format_w = U_auipc else '0';
 
-  ----------------------------- REGISTER BANK -------------------------------
+  ----------------------------- REGISTER FILE -------------------------------
   regwr_o <= '1' when proc_status_r = STAT_UPDATE_PC and not (
                       instr_format_w  = I_fence                            or
                       (instr_format_w = I_system and funct3_i = SYS_ECALL) or
@@ -253,7 +236,7 @@ begin
                       dmem_gnt_i     = '1'             else
              '0';
 
-  ------------------------------- BRANCHES ----------------------------------
+  --------------------------- CONTROL TRANSFER ------------------------------
   inv_branch_o <= funct3_i(2) xor funct3_i(0);
   branch_o <= '1' when instr_format_w = B else '0';
   jump_o   <= '1' when instr_format_w = U_jal or instr_format_w = I_jalr else '0';
