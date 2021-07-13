@@ -12,7 +12,7 @@ entity sim_from_dump is
 end entity;
 
 architecture arch of sim_from_dump is
-  constant period : time := 100 ns;
+  constant period : time := 20 ns;
   signal rstn  : std_logic := '0';
   signal clk   : std_logic := '0';
   signal start : std_logic := '0';
@@ -174,7 +174,7 @@ begin
       -- convert address to integer
       addr_v := to_integer(unsigned(dmem_addr_o));
       -- check if range is ok
-      if addr_v < DATA_BASE_ADDR or addr_v > (DATA_BASE_ADDR + DATA_SIZE) then
+      if addr_v < DATA_BASE_ADDR or addr_v >= (DATA_BASE_ADDR + DATA_SIZE) then
         dmem_err_i <= '1';
       else
         -- grant response
@@ -202,10 +202,7 @@ begin
               if dmem_usgn_o = '1' then
                 dmem_rdata_i <= x"000000" & data_mem(addr_v);
               else
-                dmem_rdata_i <= (
-                  31 downto 8 => data_mem(addr_v)(7),
-                   7 downto 0 => data_mem(0)
-                );
+                dmem_rdata_i <= (31 downto 8 => data_mem(addr_v)(7)) & data_mem(addr_v);
               end if;
 
             -- half-word read with and without sign-extension
@@ -230,6 +227,7 @@ begin
               report "Wrong parameters to data memory" severity ERROR;
 
           end case;
+          report to_hstring(dmem_addr_o) & ": " & to_hstring(dmem_rdata_i);
         end if;
       end if;
       -- response for 1 cycle
