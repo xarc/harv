@@ -6,13 +6,11 @@ HARV is being developed in partnership between the **LEDS - Laboratory of Embedd
 
 The HARV was introduced by the paper published at the IEEE DTIS 2020, and it has been in continued:
 
-D. A. Santos, L. M. Luza, C. A. Zeferino, L. Dilillo and D. R. Melo, "A Low-Cost Fault-Tolerant RISC-V Processor for Space Systems," *2020 15th Design & Technology of Integrated Systems in Nanoscale Era (DTIS), 2020*, pp. 1-5, doi: [10.1109/DTIS48698.2020.9081185](https://doi.org/10.1109/DTIS48698.2020.9081185).
+D. A. Santos, L. M. Luza, C. A. Zeferino, L. Dilillo and D. R. Melo, "A Low-Cost Fault-Tolerant RISC-V Processor for Space Systems," *15th Design & Technology of Integrated Systems in Nanoscale Era (DTIS)*, 2020, pp. 1-5, doi: [10.1109/DTIS48698.2020.9081185](https://doi.org/10.1109/DTIS48698.2020.9081185).
 
-D. A. Santos, L. M. Luza, L. Dilillo, C. A. Zeferino and D. R. Melo, "Reliability analysis of a fault-tolerant RISC-V system-on-chip," *Microelectronics Reliability, 2021*, doi: [10.1016/j.microrel.2021.114346](https://doi.org/10.1016/j.microrel.2021.114346).
+D. A. Santos, L. M. Luza, L. Dilillo, C. A. Zeferino and D. R. Melo, "Reliability analysis of a fault-tolerant RISC-V system-on-chip," *Microelectronics Reliability*, 2021, doi: [10.1016/j.microrel.2021.114346](https://doi.org/10.1016/j.microrel.2021.114346).
 
-D. A. Santos, L. M. Luza, M. Kastriotou, C. Cazzaniga, C. A. Zeferino, D. R. Melo and L. Dilillo, "Characterization of a RISC-V System-on-Chip under Neutron Radiation," *2021 16th International Conference on Design & Technology of Integrated Systems in Nanoscale Era (DTIS), 2021*, pp. 1-6, doi: [10.1109/DTIS53253.2021.9505054](https://doi.org/10.1109/DTIS53253.2021.9505054).
-
-
+D. A. Santos, L. M. Luza, M. Kastriotou, C. Cazzaniga, C. A. Zeferino, D. R. Melo and L. Dilillo, "Characterization of a RISC-V System-on-Chip under Neutron Radiation," *16th International Conference on Design & Technology of Integrated Systems in Nanoscale Era (DTIS)*, 2021, pp. 1-6, doi: [10.1109/DTIS53253.2021.9505054](https://doi.org/10.1109/DTIS53253.2021.9505054).
 
 The current mantainer of this repository is [Douglas Almeida dos Santos](https://github.com/Douglasas).
 
