@@ -84,7 +84,7 @@ begin
     signal data_s1_enc_w : std_logic_vector(PARITY_BITS_QT+31 downto 0);
     signal data_s2_enc_w : std_logic_vector(PARITY_BITS_QT+31 downto 0);
   begin
-    hamming_encoder_i : hamming_encoder
+    hamming_encoder_u : hamming_encoder
      generic map (
        DATA_SIZE     => 32,
        DETECT_DOUBLE => DETECT_DOUBLE
@@ -111,7 +111,7 @@ begin
     data_s1_enc_w <= regfile_w(to_integer(unsigned(rs1_i)));
     data_s2_enc_w <= regfile_w(to_integer(unsigned(rs2_i)));
 
-    hamming_decoder_data1_i : hamming_decoder
+    hamming_decoder_data1_u : hamming_decoder
      generic map (
        DATA_SIZE     => 32,
        DETECT_DOUBLE => DETECT_DOUBLE
@@ -124,7 +124,7 @@ begin
        data_o          => data1_o
      );
 
-     hamming_decoder_data2_i : hamming_decoder
+     hamming_decoder_data2_u : hamming_decoder
      generic map (
        DATA_SIZE     => 32,
        DETECT_DOUBLE => DETECT_DOUBLE

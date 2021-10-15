@@ -157,18 +157,18 @@ begin
   gen_TMR : for i in 2 downto 0 generate
     -- Xilinx attributes to prevent optimization of TMR
     attribute DONT_TOUCH : string;
-    attribute DONT_TOUCH of control_i : label is "TRUE";
+    attribute DONT_TOUCH of control_u : label is "TRUE";
     -- Synplify attributes to prevent optimization of TMR
     attribute syn_radhardlevel : string;
     attribute syn_keep         : boolean;
     attribute syn_safe_case    : boolean;
     attribute syn_noprune      : boolean;
-    attribute syn_radhardlevel of control_i : label is "tmr";
-    attribute syn_keep         of control_i : label is TRUE;
-    attribute syn_safe_case    of control_i : label is TRUE;
-    attribute syn_noprune      of control_i : label is TRUE;
+    attribute syn_radhardlevel of control_u : label is "tmr";
+    attribute syn_keep         of control_u : label is TRUE;
+    attribute syn_safe_case    of control_u : label is TRUE;
+    attribute syn_noprune      of control_u : label is TRUE;
   begin
-    control_i : control
+    control_u : control
     port map (
       imem_gnt_i       => imem_gnt_i,
       imem_err_i       => imem_err_i,

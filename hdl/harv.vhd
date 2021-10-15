@@ -124,7 +124,7 @@ begin
 
   clk_w <= clk_i;
 
-  instr_fetch_i : instr_fetch
+  instr_fetch_u : instr_fetch
   generic map (
     PROGRAM_START_ADDR    => PROGRAM_START_ADDR,
     TRAP_HANDLER_ADDR     => TRAP_HANDLER_ADDR,
@@ -168,7 +168,7 @@ begin
   imm_i_w      <= instr_w(31 downto 20);
 
   gen_ft_control : if TMR_CONTROL generate
-      control_i : control_tmr
+      control_u : control_tmr
       port map (
         start_i          => start_i,
         imem_gnt_i       => imem_gnt_i,
@@ -212,7 +212,7 @@ begin
       );
   end generate;
   gen_normal_control : if not TMR_CONTROL generate
-    control_i : control
+    control_u : control
     port map (
       -- processor status
       start_i    => start_i,
@@ -268,7 +268,7 @@ begin
                csr_rdata_w  when ctl_csr_enable_w = '1' else
                alu_data_w;
 
-  regfile_i : regfile
+  regfile_u : regfile
   generic map (
     HAMMING_ENABLE => HAMMING_REGFILE
   )
@@ -301,7 +301,7 @@ begin
   alu_data2_w <= imm_w when ctl_alusrc_imm_w = '1' else reg_data2_w;
 
   gen_ft_alu : if TMR_ALU generate
-    alu_i : alu_tmr
+    alu_u : alu_tmr
     port map (
       data1_i         => alu_data1_w,
       data2_i         => alu_data2_w,
@@ -313,7 +313,7 @@ begin
     );
   end generate;
   gen_normal_alu : if not TMR_ALU generate
-    alu_i : alu
+    alu_u : alu
     port map (
       data1_i     => alu_data1_w,
       data2_i     => alu_data2_w,
@@ -328,7 +328,7 @@ begin
                   x"00000020" when dmem_dbu_i   = '1' else -- DBU
                   x"00000007" when ctl_mem_wr_w = '1' else -- store address fault
                   x"00000005"; -- when ctl_mem_rd_w = '1'  -- load address fault
-  csr_i : csr
+  csr_u : csr
   generic map (
     TMR_CONTROL     => TMR_CONTROL,
     TMR_ALU         => TMR_ALU,

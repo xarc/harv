@@ -56,7 +56,7 @@ begin
   -- set PC output
   pc_o <= pc_w;
 
-  register_pc_i : hamming_register
+  register_pc_u : hamming_register
   generic map (
     HAMMING_ENABLE => HAMMING_PC,
     RESET_VALUE    => PROGRAM_START_ADDR
@@ -72,7 +72,7 @@ begin
     data_o       => pc_w
   );
 
-  register_instr_i : hamming_register
+  register_instr_u : hamming_register
   generic map (
     HAMMING_ENABLE => HAMMING_PC,
     RESET_VALUE    => (31 downto 0 => '0')

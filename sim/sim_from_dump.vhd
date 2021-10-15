@@ -87,7 +87,7 @@ begin
   clk   <= not clk after period/2;
   start <= '1' after period * 2; -- set start signal after 2 clock cycles
 
-  harv_i : harv
+  harv_u : harv
   generic map (
     PROGRAM_START_ADDR => x"00000000",
     TRAP_HANDLER_ADDR  => x"00000000",

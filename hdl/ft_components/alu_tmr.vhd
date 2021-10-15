@@ -35,18 +35,18 @@ begin
   gen_TMR : for i in 2 downto 0 generate
     -- Xilinx attributes to prevent optimization of TMR
     attribute DONT_TOUCH : string;
-    attribute DONT_TOUCH of alu_i : label is "TRUE";
+    attribute DONT_TOUCH of alu_u : label is "TRUE";
     -- Synplify attributes to prevent optimization of TMR
     attribute syn_radhardlevel : string;
     attribute syn_keep         : boolean;
     attribute syn_safe_case    : boolean;
     attribute syn_noprune      : boolean;
-    attribute syn_radhardlevel of alu_i : label is "tmr";
-    attribute syn_keep         of alu_i : label is TRUE;
-    attribute syn_safe_case    of alu_i : label is TRUE;
-    attribute syn_noprune      of alu_i : label is TRUE;
+    attribute syn_radhardlevel of alu_u : label is "tmr";
+    attribute syn_keep         of alu_u : label is TRUE;
+    attribute syn_safe_case    of alu_u : label is TRUE;
+    attribute syn_noprune      of alu_u : label is TRUE;
   begin
-    alu_i : alu
+    alu_u : alu
     port map (
       data1_i     => data1_i,
       data2_i     => data2_i,

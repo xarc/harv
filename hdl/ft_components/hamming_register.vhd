@@ -61,7 +61,7 @@ begin
   begin
 
     -- encode next register data
-    hamming_encoder_i : hamming_encoder
+    hamming_encoder_u : hamming_encoder
     generic map (
       DATA_SIZE     => 32,
       DETECT_DOUBLE => DETECT_DOUBLE
@@ -84,7 +84,7 @@ begin
     end process;
 
     -- decode the data
-    hamming_decoder_i : hamming_decoder
+    hamming_decoder_u : hamming_decoder
     generic map (
       DATA_SIZE     => 32,
       DETECT_DOUBLE => DETECT_DOUBLE
