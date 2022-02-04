@@ -109,6 +109,8 @@ architecture arch of control is
 
   -- signal rshift_op_w   : std_logic_vector(ALUOP_SIZE-1 downto 0);
   -- signal add_op_w      : std_logic_vector(ALUOP_SIZE-1 downto 0);
+  signal shift_op_w   : std_logic;
+  signal add_sub_op_w : std_logic;
   signal aluop_w     : std_logic_vector(ALUOP_SIZE-1 downto 0);
   signal branch_op_w : std_logic_vector(ALUOP_SIZE-1 downto 0);
 
@@ -209,18 +211,19 @@ begin
     ALU_SLTU_OP when "11", -- bltu or bgeu
     ALU_XOR_OP  when others; -- not in specification
 
-  aluop_w <= "0"         & funct3_i when instr_format_w = I_arith else
-             funct7_i(5) & funct3_i when instr_format_w = R       else
-             branch_op_w            when instr_format_w = B       else
+  shift_op_w   <= '1' when funct3_i(1 downto 0) = "01"  else '0';
+  add_sub_op_w <= '1' when funct3_i             = "000" else '0';
+
+  aluop_w <= (funct7_i(5) and shift_op_w)                   & funct3_i when instr_format_w = I_arith else
+             (funct7_i(5) and (shift_op_w or add_sub_op_w)) & funct3_i when instr_format_w = R       else
+             branch_op_w                                               when instr_format_w = B       else
              ALU_ADD_OP; -- when instr_format_w = U_auipc, I_load, S
   aluop_o <= aluop_w;
   alusrc_imm_o <= '1' when instr_format_w /= R and instr_format_w /= B else '0';
 
   ------------------------ IMMEDIATE SELECTOR ------------------------------
   -- instr[24:20]
-  imm_shamt_o <= '1' when (aluop_w = ALU_SLL_OP  or
-                           aluop_w = ALU_SRL_OP  or
-                           aluop_w = ALU_SRA_OP) else '0';
+  imm_shamt_o <= '1' when (instr_format_w = I_arith or instr_format_w = R) and shift_op_w = '1'  else '0';
   -- instr[31:12] -> imm[31:12]
   imm_up_o <= '1' when instr_format_w = U_lui   or
                        instr_format_w = U_auipc else '0';
